@@ -1,11 +1,12 @@
 package main
 
 import (
-	"log"
+	// "log"
 	"fmt"
-	"strconv"
+	// "strconv"
 	// "go-api-gdrive/utils"
-	"github.com/tealeg/xlsx"
+	// "github.com/tealeg/xlsx"
+    "github.com/360EntSecGroup-Skylar/excelize"
 )
 
 
@@ -18,33 +19,23 @@ func main() {
     //     log.Fatalf("Unable to download file: %v", err)
     // }
 
-	xlFile, err := xlsx.OpenFile("download/07. DATA PRODUKSI HARIAN JULI 2024.xlsx")
-    if err != nil {
-        log.Fatalf("Error opening file: %v", err)
-    }
+	xlsxFile := "download/07. DATA PRODUKSI HARIAN JULI 2024.xlsx"
+	f, err := excelize.OpenFile(xlsxFile)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
 
-    // Temukan sheet yang diinginkan
-    var sheet *xlsx.Sheet
-    for _, s := range xlFile.Sheets {
-        if s.Name == "7" {
-            sheet = s
-            break
-        }
-    }
+	sheetName := "7" // Ganti sesuai nama sheet Anda
+	row := 7         // Ganti dengan nomor baris yang ingin dibaca
+	col := "K"       // Ganti dengan huruf kolom yang ingin dibaca
 
-    if sheet == nil {
-        log.Fatalf("Sheet '7' not found")
-    }
+	cellValue := f.GetCellValue(sheetName, fmt.Sprintf("%s%d", col, row))
+	if cellValue == "" {
+		fmt.Println("Error reading cell value:", err)
+		return
+	}
 
-	for i := 6; i < 14; i++ { // baris 7 sampai 14 (indeks dimulai dari 0)
-        cell := sheet.Cell(i, 10) // Kolom K adalah kolom ke-10 (indeks dimulai dari 0)
-        // Menggunakan Float64 untuk membaca angka dengan presisi yang tepat
-        value, err := cell.Float()
-        if err != nil {
-            log.Fatalf("Error reading cell value: %v", err)
-        }
-        // Format angka dengan dua angka desimal
-        formattedValue := strconv.FormatFloat(value, 'f', 2, 64)
-        fmt.Printf("Cell K%d: %s\n", i+1, formattedValue) // i+1 karena ingin mencetak baris ke-7 sampai ke-14
-    }
+	fmt.Printf("Data pada sheet %s baris %d kolom %s: %s\n", sheetName, row, col, cellValue)
 }
+

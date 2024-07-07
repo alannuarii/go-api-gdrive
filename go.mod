@@ -4,10 +4,13 @@ go 1.22.0
 
 require google.golang.org/api v0.187.0
 
+require github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+
 require (
 	cloud.google.com/go/auth v0.6.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

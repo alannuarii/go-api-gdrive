@@ -3,8 +3,9 @@ package main
 import (
 	// "log"
 	"fmt"
-	"time"
+	// "time"
 	"strconv"
+	"strings"
 	// "go-api-gdrive/utils"
     "github.com/360EntSecGroup-Skylar/excelize"
 )
@@ -26,9 +27,9 @@ func main() {
 		return
 	}
 
-	sheetName := "9" // Ganti sesuai nama sheet Anda
-	row := 12         // Ganti dengan nomor baris yang ingin dibaca
-	col := "H"       // Ganti dengan huruf kolom yang ingin dibaca
+	sheetName := "Rekapitulasi" // Ganti sesuai nama sheet Anda
+	row := 6                    // Ganti dengan nomor baris yang ingin dibaca
+	col := "K"                  // Ganti dengan huruf kolom yang ingin dibaca
 
 	cellValue := f.GetCellValue(sheetName, fmt.Sprintf("%s%d", col, row))
 	if cellValue == "" {
@@ -36,24 +37,44 @@ func main() {
 		return
 	}
 
-	// Coba konversi nilai sel menjadi float64
-	numValue, err := strconv.ParseFloat(cellValue, 64)
-	if err != nil {
-		// Jika tidak bisa dikonversi ke float64, mungkin nilai bukan numerik atau waktu
-		fmt.Printf("Data pada sheet %s baris %d kolom %s: %s\n", sheetName, row, col, cellValue)
-		return
-	}
+	// Jika nilai sel dalam format HH:MM
+	if strings.Contains(cellValue, ":") {
+		timeParts := strings.Split(cellValue, ":")
+		hours, err := strconv.Atoi(timeParts[0])
+		if err != nil {
+			fmt.Println("Error parsing hours:", err)
+			return
+		}
+		minutes, err := strconv.Atoi(timeParts[1])
+		if err != nil {
+			fmt.Println("Error parsing minutes:", err)
+			return
+		}
 
-	// Periksa apakah nilai numerik ini mungkin merupakan waktu Excel
-	if numValue > 0 && numValue < 1 {
-		// Excel menyimpan waktu sebagai bagian desimal dari hari (misalnya, 0.5 = 12:00 PM)
-		timeValue := time.Date(1899, 12, 30, 0, 0, 0, 0, time.UTC).Add(time.Duration(numValue * 24 * float64(time.Hour)))
-		formattedValue := timeValue.Format("15:04")
-		fmt.Printf("Data pada sheet %s baris %d kolom %s: %s\n", sheetName, row, col, formattedValue)
+		// Konversi ke desimal
+		decimalValue := float64(hours) + float64(minutes)/60
+		fmt.Printf("Data pada sheet %s baris %d kolom %s: %.2f\n", sheetName, row, col, decimalValue)
 	} else {
-		// Jika tidak, format sebagai angka biasa
-		formattedValue := fmt.Sprintf("%.2f", numValue)
-		fmt.Printf("Data pada sheet %s baris %d kolom %s: %s\n", sheetName, row, col, formattedValue)
+		// Coba konversi nilai sel menjadi float64
+		numValue, err := strconv.ParseFloat(cellValue, 64)
+		if err != nil {
+			// Jika tidak bisa dikonversi ke float64, mungkin nilai bukan numerik atau waktu
+			fmt.Printf("Data pada sheet %s baris %d kolom %s: %s\n", sheetName, row, col, cellValue)
+			return
+		}
+
+		// Periksa apakah nilai numerik ini mungkin merupakan waktu Excel
+		if numValue > 0 && numValue < 1 {
+			// Excel menyimpan waktu sebagai bagian desimal dari hari (misalnya, 0.5 = 12:00 PM)
+			hours := int(numValue * 24)
+			minutes := int((numValue*24 - float64(hours)) * 60)
+			decimalValue := float64(hours) + float64(minutes)/60
+			fmt.Printf("Data pada sheet %s baris %d kolom %s: %.2f\n", sheetName, row, col, decimalValue)
+		} else {
+			// Jika tidak, format sebagai angka biasa
+			formattedValue := fmt.Sprintf("%.2f", numValue)
+			fmt.Printf("Data pada sheet %s baris %d kolom %s: %s\n", sheetName, row, col, formattedValue)
+		}
 	}
 }
 
